@@ -18,7 +18,7 @@ app.get("/test", (req, res) => {
 })
 
 app.get("/test1", (req, res) => {
-    req.json({
+    res.json({
         sucess: true,
         message: " test1 successfull"
     })
