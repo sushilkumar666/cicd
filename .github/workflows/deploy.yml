@@ -1,0 +1,39 @@
+name: CI/CD Pipeline  # Workflow name
+
+on:
+  push:
+    branches:
+      - main  # Jab main branch me push hoga, tab ye workflow chalega
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest  # Ye job Ubuntu environment me chalega
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2  # Repo ka latest code pull karega
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # Node.js version define karo
+
+      - name: Install Dependencies
+        run: npm install  # Package install karega
+
+      - name: Run Tests
+        run: npm test  # Tests execute karega (agar tumhare pass hai)
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}  # EC2 instance ka IP (GitHub Secrets me store karo)
+          username: ubuntu  # EC2 ka SSH user
+          key: ${{ secrets.EC2_SSH_KEY }}  # Private SSH key (Secrets me store karo)
+          port: 22
+          script: |
+            cd /home/ubuntu/myapp  # Project directory me jao
+            git pull origin main  # Latest code pull karo
+            npm install  # Dependencies install karo
+            pm2 restart app  # PM2 se server restart karo
