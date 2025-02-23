@@ -1,28 +1,18 @@
-name: CI/CD Pipeline  # Workflow name
+name: Deploy to EC2
 
 on:
   push:
     branches:
-      - master  # Jab main branch me push hoga, tab ye workflow chalega
+      - master  # Sirf main branch push pe deploy hoga
 
 jobs:
   deploy:
     name: Deploy to EC2
-    runs-on: ubuntu-latest  # Ye job Ubuntu environment me chalega
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2  # Repo ka latest code pull karega
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'  # Node.js version define karo
-
-      - name: Install Dependencies
-        run: npm install  # Package install karega
-
-     
+        uses: actions/checkout@v2  # GitHub repo ka code pull karega
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.2.0
@@ -32,18 +22,23 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            cd /cicd  # Apni project directory me jao
-            git pull origin main  # Latest code pull karo
-            npm install  # Dependencies install karo
-            
-            # PM2 install karo agar pehle se nahi hai
+            # Node.js install karega agar nahi hai
+            if ! command -v node &> /dev/null
+            then
+                echo "Installing Node.js..."
+                curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+                sudo apt install -y nodejs
+            fi
+
+            # PM2 install karega agar nahi hai
             if ! command -v pm2 &> /dev/null
             then
-                echo "PM2 not found, installing..."
-                npm install -g pm2
+                echo "Installing PM2..."
+                sudo npm install -g pm2
             fi
-            
-            pm2 restart app || pm2 start index.js --name "app"  # PM2 restart ya start karo
-            pm2 save  # Changes save karo
-            pm2 startup  # Auto-start enable karo (ek baar zaroori hai)
 
+            # Deploy the Node.js app
+            cd /cicd  # Apni app ka path set karo
+            git pull origin master    # Latest code pull karega
+            npm install             # Dependencies install karega
+            pm2 restart app || pm2 start index.js --name "app"  # App restart ya start karega
