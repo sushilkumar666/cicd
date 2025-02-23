@@ -17,6 +17,14 @@ app.get("/test", (req, res) => {
     })
 })
 
+app.get("/test1", (req, res) => {
+    req.json({
+        sucess: true,
+        message: " test1 successfull"
+    })
+})
 
-console.log("ci/cd test")
+
+console.log("ci/cd test");
+
 app.listen(3000, () => console.log("app listening on port 3000"));
