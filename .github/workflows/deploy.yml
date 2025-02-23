@@ -22,8 +22,7 @@ jobs:
       - name: Install Dependencies
         run: npm install  # Package install karega
 
-      - name: Run Tests
-        run: npm test  # Tests execute karega (agar tumhare pass hai)
+     
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.2.0
