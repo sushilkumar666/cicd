@@ -38,7 +38,7 @@ jobs:
             fi
 
             # Deploy the Node.js app
-            cd /cicd  # Apni app ka path set karo
+            cd cicd  # Apni app ka path set karo
             git pull origin master    # Latest code pull karega
             npm install             # Dependencies install karega
             pm2 restart index.js "app" || pm2 start index.js --name "app"  # App restart ya start karega
