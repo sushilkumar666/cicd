@@ -17,7 +17,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Node.js version define karo
+          node-version: '20'  # Node.js version define karo
 
       - name: Install Dependencies
         run: npm install  # Package install karega
@@ -27,12 +27,23 @@ jobs:
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.EC2_HOST }}  # EC2 instance ka IP (GitHub Secrets me store karo)
-          username: ubuntu  # EC2 ka SSH user
-          key: ${{ secrets.EC2_SSH_KEY }}  # Private SSH key (Secrets me store karo)
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            cd /home/ubuntu/myapp  # Project directory me jao
+            cd /cicd  # Apni project directory me jao
             git pull origin main  # Latest code pull karo
             npm install  # Dependencies install karo
-            pm2 restart app  # PM2 se server restart karo
+            
+            # PM2 install karo agar pehle se nahi hai
+            if ! command -v pm2 &> /dev/null
+            then
+                echo "PM2 not found, installing..."
+                npm install -g pm2
+            fi
+            
+            pm2 restart app || pm2 start index.js --name "app"  # PM2 restart ya start karo
+            pm2 save  # Changes save karo
+            pm2 startup  # Auto-start enable karo (ek baar zaroori hai)
+
