@@ -3,7 +3,7 @@ name: CI/CD Pipeline  # Workflow name
 on:
   push:
     branches:
-      - main  # Jab main branch me push hoga, tab ye workflow chalega
+      - master  # Jab main branch me push hoga, tab ye workflow chalega
 
 jobs:
   deploy:
